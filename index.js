@@ -48,7 +48,7 @@ module.exports = function(config, logger) {
     logger.info('deploying');
     out.stdout('--> deploying');
 
-    var slug = containerDef.specific.slug;
+    var slug = containerDef.specific.slug || containerDef.specific.name;
     assert(slug);
     var cmd = 'docker pull ' + slug;
 
@@ -89,9 +89,9 @@ module.exports = function(config, logger) {
   var start = function start(mode, target, system, containerDef, container, out, cb) {
     logger.info('starting');
     out.stdout('--> starting');
-    var cmd = 'docker run ' + containerDef.specific.execute.args + ' ' +
-              (containerDef.specific.execute.name || containerDef.specific.slug) +
-              ' ' + containerDef.specific.execute.exec;
+    var cmd = 'docker run ' + containerDef.specific.args + ' ' +
+              (containerDef.specific.name || containerDef.specific.slug) +
+              ' ' + (containerDef.specific.exec || '');
 
     if (mode === 'preview') {
       out.preview({ cmd: cmd });
