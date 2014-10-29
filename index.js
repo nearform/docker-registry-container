@@ -45,6 +45,9 @@ module.exports = function(config, logger) {
    * cb - complete callback
    */
   var deploy = function deploy(mode, target, system, containerDef, container, out, cb) {
+    logger.info('deploying');
+    out.stdout('--> deploying');
+
     var slug = containerDef.specific.slug;
     assert(slug);
     var cmd = 'docker pull ' + slug;
@@ -86,7 +89,16 @@ module.exports = function(config, logger) {
   var start = function start(mode, target, system, containerDef, container, out, cb) {
     logger.info('starting');
     out.stdout('--> starting');
-    cb();
+    var cmd = 'docker run ' + containerDef.specific.execute.args + ' ' +
+              (containerDef.specific.execute.name || containerDef.specific.slug) +
+              ' ' + containerDef.specific.execute.exec;
+
+    if (mode === 'preview') {
+      out.preview({ cmd: cmd });
+      return cb();
+    }
+
+    executor.exec(target.privateIpAddress, cmd, out, cb);
   };
 
 
