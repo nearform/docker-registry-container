@@ -101,10 +101,8 @@ module.exports = function(config, logger) {
    * cb - complete callback
    */
   var stop = function stop(mode, target, system, containerDef, container, out, cb) {
-    console.dir(arguments);
     logger.info('stopping');
     out.stdout('stopping');
-    if (monitors[system.id]) { monitors[system.id].kill(); }
     cb();
   };
 
