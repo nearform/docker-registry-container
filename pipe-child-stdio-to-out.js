@@ -19,7 +19,10 @@ module.exports = function(child, out) {
     child[k].on('readable', function() {
       var chunk;
       while ((chunk = this.read()) !== null) {
-        out[k](chunk.toString('utf8'));
+        chunk = chunk.toString('utf8');
+        if (!/^\n+$/.test(chunk)) {
+          out[k](chunk.toString('utf8'));
+        }
       }
     });
   });
