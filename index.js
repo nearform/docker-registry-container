@@ -54,10 +54,13 @@ module.exports = function(config, logger) {
       return cb(new Error('missing name for definition ' + containerDef.id));
     }
 
+
+    console.log(target);
+
     var cmd = 'docker pull ' + name;
 
     if (mode === 'preview') {
-      out.preview({ cmd: cmd });
+      out.preview({ host: target.privateIpAddress || 'localhost', cmd: cmd });
       return cb();
     }
 
@@ -100,7 +103,7 @@ module.exports = function(config, logger) {
     var cmd = 'docker run ' + args + ' ' + name + ' ' + exec;
 
     if (mode === 'preview') {
-      out.preview({ cmd: cmd });
+      out.preview({ host: target.privateIpAddress || 'localhost', cmd: cmd });
       return cb();
     }
 
