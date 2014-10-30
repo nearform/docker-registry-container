@@ -40,7 +40,7 @@ module.exports = function(config, logger) {
       return cb(new Error('missing name for definition ' + containerDef.id));
     }
 
-    if (containerDef.specific.execute) {
+    if (!containerDef.specific.execute) {
       return cb(new Error('missing execute block in ' + containerDef.id + ' container definition'));
     }
 
