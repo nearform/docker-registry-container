@@ -17,6 +17,7 @@
 var assert = require('assert');
 var bunyan = require('bunyan');
 var Executor = require('./executor.js');
+var findImage = require('./docker').findImage;
 
 module.exports = function(config, logger) {
   logger = logger || bunyan.createLogger({name: 'docker-registry-container'});
@@ -29,8 +30,47 @@ module.exports = function(config, logger) {
    * out - ouput stream 
    * cb - complete callback
    */
-  var build = function build(mode, system, cdef, out, cb) {
-    cb(null, {});
+  var build = function build(mode, system, containerDef, out, cb) {
+    logger.info('building');
+    out.stdout('--> building');
+
+    var name = containerDef.specific.name;
+
+    if (!name) {
+      return cb(new Error('missing name for definition ' + containerDef.id));
+    }
+
+    var pull = 'docker pull ' + name;
+    var tag = 'docker tag ' + name + ' ' + system.name + '/' + name;
+
+    if (mode === 'preview') {
+      out.preview({ host: target.privateIpAddress || 'localhost', cmd: pull });
+      out.preview({ host: target.privateIpAddress || 'localhost', cmd: tag });
+      return cb();
+    }
+
+    executor.exec(null, pull, out, function(err) {
+      if (err) {
+        return cb(err);
+      }
+
+      executor.exec(null, tag, out, function(err) {
+
+        if (err) {
+          return cb(err);
+        }
+
+        findImage(system.name + '/' + name, function(err, image) {
+          if (err) {
+            return cb(err);
+          }
+
+          cb(null, {
+            dockerImageId: image.Id
+          });
+        });
+      });
+    });
   };
 
 
@@ -45,26 +85,7 @@ module.exports = function(config, logger) {
    * cb - complete callback
    */
   var deploy = function deploy(mode, target, system, containerDef, container, out, cb) {
-    logger.info('deploying');
-    out.stdout('--> deploying');
-
-    var name = containerDef.specific.name;
-
-    if (!name) {
-      return cb(new Error('missing name for definition ' + containerDef.id));
-    }
-
-
-    console.log(target);
-
-    var cmd = 'docker pull ' + name;
-
-    if (mode === 'preview') {
-      out.preview({ host: target.privateIpAddress || 'localhost', cmd: cmd });
-      return cb();
-    }
-
-    executor.exec(target.privateIpAddress, cmd, out, cb);
+    cb();
   };
 
 
