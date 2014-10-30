@@ -40,33 +40,33 @@ module.exports = function(config, logger) {
       return cb(new Error('missing name for definition ' + containerDef.id));
     }
 
-    var pull = 'docker pull ' + name;
-    var tag = 'docker tag ' + name + ' ' + system.name + '/' + name;
-
-    if (mode === 'preview') {
-      out.preview({ host: target.privateIpAddress || 'localhost', cmd: pull });
-      out.preview({ host: target.privateIpAddress || 'localhost', cmd: tag });
-      return cb();
+    if (containerDef.specific.execute) {
+      return cb(new Error('missing execute block in ' + containerDef.id + ' container definition'));
     }
 
-    executor.exec(null, pull, out, function(err) {
+    var pullCmd = 'docker pull ' + name;
+    var tag = system.name + '/' + containerDef.id;
+    var tagCmd = 'docker tag ' + name + ' ' + tag;
+
+    executor.exec(null, pullCmd, out, function(err) {
       if (err) {
         return cb(err);
       }
 
-      executor.exec(null, tag, out, function(err) {
+      executor.exec(null, tagCmd, out, function(err) {
 
         if (err) {
           return cb(err);
         }
 
-        findImage(system.name + '/' + name, function(err, image) {
+        findImage(tag, function(err, image) {
           if (err) {
             return cb(err);
           }
 
           cb(null, {
-            dockerImageId: image.Id
+            dockerImageId: image.Id,
+            imageTag: tag
           });
         });
       });
