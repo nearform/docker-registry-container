@@ -118,10 +118,10 @@ module.exports = function(config, logger) {
     logger.info('starting');
     out.stdout('--> starting');
 
-    var name = containerDef.specific.name;
+    var tag = system.name + '/' + containerDef.id;
     var args = containerDef.specific.execute.args || '';
     var exec = containerDef.specific.execute.exec || '';
-    var cmd = 'docker run ' + args + ' ' + name + ' ' + exec;
+    var cmd = 'docker run ' + args + ' ' + tag + ' ' + exec;
 
     if (mode === 'preview') {
       out.preview({ host: target.privateIpAddress || 'localhost', cmd: cmd });
