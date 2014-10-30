@@ -48,9 +48,13 @@ module.exports = function(config, logger) {
     logger.info('deploying');
     out.stdout('--> deploying');
 
-    var slug = containerDef.specific.slug || containerDef.specific.name;
-    assert(slug);
-    var cmd = 'docker pull ' + slug;
+    var name = containerDef.specific.name;
+
+    if (!name) {
+      return cb(new Error('missing name for definition ' + containerDef.id));
+    }
+
+    var cmd = 'docker pull ' + name;
 
     if (mode === 'preview') {
       out.preview({ cmd: cmd });
@@ -89,9 +93,11 @@ module.exports = function(config, logger) {
   var start = function start(mode, target, system, containerDef, container, out, cb) {
     logger.info('starting');
     out.stdout('--> starting');
-    var cmd = 'docker run ' + containerDef.specific.args + ' ' +
-              (containerDef.specific.name || containerDef.specific.slug) +
-              ' ' + (containerDef.specific.exec || '');
+
+    var name = containerDef.specific.name;
+    var args = containerDef.specific.execute.args || '';
+    var exec = containerDef.specific.execute.exec || '';
+    var cmd = 'docker run ' + args + ' ' + name + ' ' + exec;
 
     if (mode === 'preview') {
       out.preview({ cmd: cmd });
