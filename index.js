@@ -18,6 +18,7 @@ var assert = require('assert');
 var bunyan = require('bunyan');
 var Executor = require('./executor.js');
 var findImage = require('./docker').findImage;
+var toTargetIp = require('nscale-target-ip');
 
 module.exports = function(config, logger) {
   logger = logger || bunyan.createLogger({name: 'docker-registry-container'});
@@ -122,6 +123,8 @@ module.exports = function(config, logger) {
     var args = containerDef.specific.execute.args || '';
     var exec = containerDef.specific.execute.exec || '';
     var cmd = 'docker run ' + args + ' ' + tag + ' ' + exec;
+
+    cmd = cmd.replace('__TARGETIP__', toTargetIp(target.privateIpAddress));
 
     if (mode === 'preview') {
       out.preview({ host: target.privateIpAddress || 'localhost', cmd: cmd });
