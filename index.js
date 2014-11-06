@@ -64,9 +64,18 @@ module.exports = function(config, logger) {
             return cb(err);
           }
 
-          cb(null, {
-            dockerImageId: image.Id,
-            imageTag: tag
+          var containerBinaryPath = system.repoPath + '/builds/' + image.Id;
+          var exportCmd = 'docker save ' + image.Id + ' > ' + containerBinaryPath;
+          executor.exec(null, exportCmd, out, function(err) {
+            if (err) {
+              return cb(err);
+            }
+
+            cb(null, {
+              dockerImageId: image.Id,
+              containerBinary: containerBinaryPath,
+              imageTag: tag
+            });
           });
         });
       });
